@@ -8,22 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 class Attendance extends Model
 {
     use HasFactory;
-    // // Kolom yang diizinkan untuk diisi massal
+
+    protected $table = 'attendances';
+
+    // Mendaftarkan kolom yang diizinkan untuk diisi massal
     protected $fillable = [
+        'employee_id',
         'tanggal',
-        'id_karyawan',
-        'nama_karyawan',
-        'devisi',
-        'kelompok',
-        'shift',
+        'kelompok_kerja_harian',
         'jam_masuk',
         'jam_pulang',
-        'keterangan',
-        'nominal_gaji',
+        'keterangan'
     ];
-    // Relasi balik ke model User (Karyawan)
-    public function user()
+
+    // RELASI: Menghubungkan data absensi ke master data karyawan
+    public function employee()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Employee::class, 'employee_id');
     }
 }

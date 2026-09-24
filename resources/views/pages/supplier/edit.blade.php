@@ -72,18 +72,18 @@
                                 Kode Supplier <span class="text-red-500">*</span>
                             </label>
                             <div class="relative flex">
-                                <span
-                                    class="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-gray-300 bg-gray-50 text-gray-500 font-bold text-sm">
-                                    SUP
+                                <span class="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-gray-300 bg-gray-50 text-gray-500 font-bold text-sm">
+                                    <!-- Teks prefix otomatis mendeteksi kondisi awal data dari database -->
+                                    <span id="prefix-text">{{ $supplier->jenis_supplier === 'Bahan Baku' ? 'SKG' : 'SUP' }}</span>
                                 </span>
                                 <input type="text" id="kode" name="kode" required placeholder="001"
-                                    {{-- Membersihkan prefix 'SUP-' yang ada di database agar tidak double saat tampil --}}
-                                    value="{{ old('kode', str_replace('SUP-', '', $supplier->kode)) }}"
+                                    {{-- Menggunakan regex untuk membersihkan prefiks SUP- atau SKG- dari database --}}
+                                    value="{{ old('kode', preg_replace('/^(SUP|SKG)-/i', '', $supplier->kode)) }}"
                                     oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')"
                                     class="w-full rounded-r-xl border-gray-300 py-2.5 px-4 text-gray-900 shadow-sm focus:outline-none focus:border-[#FFC829] transition-colors border uppercase">
                             </div>
                             <p class="text-[10px] text-gray-400 mt-1 italic">
-                                *Cukup masukkan kode/angka setelah SUP-KODE_SUPPLIER
+                                *Cukup masukkan kode/angka setelah <span id="format-text">{{ $supplier->jenis_supplier === 'Bahan Baku' ? 'SKG-KODE_SUPPLIER' : 'SUP-KODE_SUPPLIER' }}</span>
                             </p>
                         </div>
                     </div>
@@ -107,4 +107,20 @@
             </div>
         </form>
     </div>
+    <script>
+        document.getElementById('jenis_supplier').addEventListener('change', function() {
+            let jenisSupplier = this.value;
+            let prefixText = document.getElementById('prefix-text');
+            let formatText = document.getElementById('format-text');
+            
+            // Menyesuaikan teks visual berdasarkan option value: 'Bahan Baku' atau 'Barang'
+            if (jenisSupplier === 'Bahan Baku') {
+                prefixText.innerText = 'SKG';
+                formatText.innerText = 'SKG-KODE_SUPPLIER';
+            } else {
+                prefixText.innerText = 'SUP';
+                formatText.innerText = 'SUP-KODE_SUPPLIER';
+            }
+        });
+    </script>
 </x-layout.user.app>

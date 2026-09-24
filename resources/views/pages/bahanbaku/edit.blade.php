@@ -5,6 +5,7 @@
             jumlah: {{ $bahanBaku->jumlah_diterima }},
                 harga: {{ $bahanBaku->harga }},
                 diskon: {{ $bahanBaku->diskon ?? 0 }},
+                potongan: {{ $bahanBaku->potongan_harga ?? 0 }},
                 selectedFoto: '{{ $bahanBaku->Inventory->Barang->foto ? asset('storage/' . $bahanBaku->Inventory->Barang->foto) : '' }}',
                 selectedKode: '{{ $bahanBaku->Inventory->Barang->kode }}',
                 selectedSatuan: '{{ $bahanBaku->Inventory->Barang->satuan }}',
@@ -32,8 +33,9 @@
         
                 get total() {
                     let subtotal = this.jumlah * this.harga;
-                    let potongan = subtotal * (this.diskon / 100);
-                    return subtotal - potongan;
+                    let potonganPersen = subtotal * (this.diskon / 100);
+                    let hasil = subtotal - potonganPersen - this.potongan;
+                    return hasil > 0 ? hasil : 0;
                 },
         
                 get filteredBarangs() {
@@ -75,6 +77,12 @@
                     <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
                         Edit Barang: <span class="text-purple-600">Bahan Baku</span>
                     </h1>
+
+                    @if(session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -260,6 +268,17 @@
                                                 placeholder="0" min="0" max="100">
                                             <span
                                                 class="absolute right-4 top-1/2 -translate-y-1/2 text-rose-400 font-bold">%</span>
+                                        </div>
+                                    </div>
+
+                                    {{-- Input Potongan Harga Rupiah --}}
+                                    <div class="space-y-1.5 text-left">
+                                        <label class="text-xs font-bold text-gray-500 uppercase ml-1">Potongan Harga (Nominal)</label>
+                                        <div class="relative">
+                                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
+                                            <input type="number" step="any" name="potongan_harga" x-model.number="potongan"
+                                                class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 font-bold outline-none"
+                                                placeholder="0">
                                         </div>
                                     </div>
                                 </div>

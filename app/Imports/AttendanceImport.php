@@ -3,67 +3,92 @@
 namespace App\Imports;
 
 use App\Models\Attendance;
+use App\Models\Employee;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Carbon\Carbon;
 
 class AttendanceImport implements ToModel, WithHeadingRow
 {
-    public function model(array $row)
+        public function model(array $row)
     {
-         // 1. Logika Saringan Tanggal (Sudah Sempurna)
-        $tanggalRaw = $row['tanggal'];
-        if (is_numeric($tanggalRaw)) {
-            $tanggal = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($tanggalRaw)->format('Y-m-d');
-        } else {
-            $tanggal = date('Y-m-d', strtotime(str_replace('/', '-', $tanggalRaw)));
+        // 1. Ambil data primer Employee berdasarkan ID Karyawan unik dari dokumen Excel
+        $employee = \App\Models\Employee::where('id_karyawan', trim($row['id_karyawan'] ?? ''))->first();
+        
+        if (!$employee) {
+            return null; // Otomatis melewati baris data jika ID Karyawan tidak terdaftar
         }
-        // 2. LOGIKA BARU: Saringan Jam Masuk (Mendukung Pecahan Desimal Excel & Teks AM/PM)
-        $jamMasuk = null;
-        if (!empty($row['jam_masuk'])) {
-            if (is_numeric($row['jam_masuk'])) {
-                // Jika berupa pecahan desimal bawaan Excel
-                $jamMasuk = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['jam_masuk'])->format('H:i:s');
-            } else {
-                // Jika berupa teks string seperti "07.00 AM"
-                $jamMasukRaw = str_replace('.', ':', $row['jam_masuk']);
-                $jamMasuk = date('H:i:s', strtotime($jamMasukRaw));
+
+        // 2. LOGIKA PENERJEMAH TANGGAL SAKTI (Mendukung format strip bawaan Excel internasional)
+        $tanggal = null;
+        $rawTanggal = trim($row['tanggal'] ?? '');
+        if (!empty($rawTanggal)) {
+            try {
+                // Mengonversi format tanggal apa pun dari Excel menjadi standar database (YYYY-MM-DD)
+                $tanggal = \Carbon\Carbon::parse($rawTanggal)->format('Y-m-d');
+            } catch (\Exception $e) {
+                $tanggal = \Carbon\Carbon::today()->format('Y-m-d');
             }
         }
-        // 3. LOGIKA BARU: Saringan Jam Pulang (Mendukung Pecahan Desimal Excel & Teks AM/PM)
-        $jamPulang = null;
-        if (!empty($row['jam_pulang'])) {
-            if (is_numeric($row['jam_pulang'])) {
-                // Jika berupa pecahan desimal bawaan Excel
-                $jamPulang = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['jam_pulang'])->format('H:i:s');
-            } else {
-                // Jika berupa teks string seperti "04.00 PM"
-                $jamPulangRaw = str_replace('.', ':', $row['jam_pulang']);
-                $jamPulang = date('H:i:s', strtotime($jamPulangRaw));
+
+        // 3. LOGIKA DETEKTIF SUPER CERDAS: KEBAL SPASI GANDA & FORMAT JAM AM/PM EXCEL
+        $jamMasuk = '07:00:00';
+        $jamPulang = '16:00:00';
+
+        // Ambil data mentah lalu bersihkan spasi ganda/berlebih di dalam teks jam
+        $rawMasuk = preg_replace('/\s+/', ' ', trim($row['jam_masuk'] ?? ''));
+        $rawPulang = preg_replace('/\s+/', ' ', trim($row['jam_pulang'] ?? ''));
+
+        // PENERJEMAH JAM MASUK
+        try {
+            if (!empty($rawMasuk)) {
+                $rawMasukUpper = strtoupper($rawMasuk);
+                if (str_contains($rawMasukUpper, 'AM') || str_contains($rawMasukUpper, 'PM')) {
+                    // Mencoba format standar dengan detik (Contoh: 9:00:00 AM)
+                    try {
+                        $jamMasuk = \Carbon\Carbon::createFromFormat('g:i:s A', $rawMasukUpper)->format('H:i:s');
+                    } catch (\Exception $e) {
+                        // Cadangan jika tanpa detik di Excel (Contoh: 9:00 AM)
+                        $jamMasuk = \Carbon\Carbon::createFromFormat('g:i A', $rawMasukUpper)->format('H:i:s');
+                    }
+                } else {
+                    $jamMasuk = \Carbon\Carbon::parse($rawMasuk)->format('H:i:s');
+                }
             }
+        } catch (\Exception $e) {
+            $jamMasuk = '07:00:00';
         }
-        // LOGIKA BARU: Saringan Shift Kerja (Mendukung A, B, dan non shift)
-        $shiftRaw = strtolower(trim($row['shift'] ?? '')); // Ubah ke huruf kecil dulu agar seragam
-        
-        if ($shiftRaw === 'a' || $shiftRaw === 'b') {
-            $shift = strtoupper($shiftRaw); // Menjadi 'A' atau 'B' huruf kapital
-        } elseif ($shiftRaw === 'non shift') {
-            $shift = 'non shift'; // Menjadi 'non shift' huruf kecil sesuai database
-        } else {
-            $shift = 'non shift'; // Jika kosong atau ketikan lain, defaultkan ke 'non shift' agar aman
+
+        // PENERJEMAH JAM PULANG
+        try {
+            if (!empty($rawPulang)) {
+                $rawPulangUpper = strtoupper($rawPulang);
+                if (str_contains($rawPulangUpper, 'AM') || str_contains($rawPulangUpper, 'PM')) {
+                    try {
+                        $jamPulang = \Carbon\Carbon::createFromFormat('g:i:s A', $rawPulangUpper)->format('H:i:s');
+                    } catch (\Exception $e) {
+                        $jamPulang = \Carbon\Carbon::createFromFormat('g:i A', $rawPulangUpper)->format('H:i:s');
+                    }
+                } else {
+                    $jamPulang = \Carbon\Carbon::parse($rawPulang)->format('H:i:s');
+                }
+            }
+        } catch (\Exception $e) {
+            $jamPulang = '16:00:00';
         }
-        
-        // 4. Masukkan Data Bersih ke Database
+
+        $kelompokHarian = !empty($row['kelompok_kerja_harian']) 
+            ? strtoupper($row['kelompok_kerja_harian']) 
+            : $employee->kelompok;
+
         return new Attendance([
-            'tanggal'       => $tanggal,
-            'id_karyawan'   => $row['id_karyawan'],
-            'nama_karyawan' => $row['nama_karyawan'],
-            'devisi'        => $row['devisi'],
-            'kelompok'      => strtolower($row['kelompok']),
-            'shift'         => $shift,
-            'jam_masuk'     => $jamMasuk,
-            'jam_pulang'    => $jamPulang,
-            'keterangan'    => strtolower($row['keterangan']),
-            'nominal_gaji'  => $row['nominal_gaji'],
+            'employee_id' => $employee->id, // Mengunci relasi ID Master Karyawan
+            'tanggal'     => $tanggal ?? \Carbon\Carbon::today()->format('Y-m-d'),
+            'kelompok_kerja_harian' => $kelompokHarian,
+            'jam_masuk'   => $jamMasuk,
+            'jam_pulang'  => $jamPulang,
+            'status_kehadiran'      => $row['status_kehadiran'] ?? 'Hadir',
+            'keterangan'  => $row['keterangan'] ?? 'Hadir',
         ]);
     }
 }

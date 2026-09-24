@@ -19,13 +19,21 @@ class SupplierImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
 
     public function model(array $row)
     {
-        $this->rowsImported++;
+        // Bersihkan data kode di excel dari ketidaksengajaan user menulis prefix
+        $cleanKode = preg_replace('/^(SUP|SKG)[-\s]*/i', '', trim($row['kode']));
+
+        // Tentukan prefix berdasarkan jenis supplier yang ditulis di excel
+        if (strcasecmp(trim($row['jenis_supplier']), 'Bahan Baku') === 0) {
+            $prefix = 'SKG-';
+        } else {
+            $prefix = 'SUP-';
+        }
 
         return new Supplier([
             'id_perusahaan'  => auth()->user()->id_perusahaan,
             'jenis_supplier' => ucwords(strtolower($row['jenis_supplier'])),
             'nama_supplier'  => $row['nama_supplier'],
-            'kode'           => $row['kode'],
+            'kode'           => strtoupper($prefix . $cleanKode),
         ]);
     }
 
@@ -34,7 +42,7 @@ class SupplierImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
         $id_perusahaan = auth()->user()->id_perusahaan;
 
         return [
-            'jenis_supplier' => 'required|in:Barang,Bahan Baku,BARANG,BAHAN BAKU',
+            'jenis_supplier' => 'required|in:Barang,Bahan Baku,BARANG,BAHAN BAKU,barang,bahan baku',
             'nama_supplier'  => [
                 'required',
                 Rule::unique('supplier', 'nama_supplier')->where('id_perusahaan', $id_perusahaan)

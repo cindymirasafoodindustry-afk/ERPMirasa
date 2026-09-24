@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan_Absensi_Dan_Gaji_Karyawan</title>
+    <title>Laporan_Rekap_Absensi_Karyawan_PT_MIRASA</title>
     <style>
         /* GAYA DESAIN UTAMA (PENGGANTI TAILWIND AGAR TIDAK POLOS) */
         body {
@@ -86,13 +86,17 @@
         .val-gaji.t { color: #3730a3; } .val-gaji.l { color: #9a3412; } .val-gaji.tl { color: #1f2937; }
 
         /* TABEL RESMI */
-        .sub-judul { font-size: 13px; font-weight: 900; text-transform: uppercase; border-left: 4px solid #111827; padding-left: 8px; margin-bottom: 15px; }
+        .sub-judul { font-size: 13px; font-weight: 900; text-transform: uppercase; border-left: 4px solid #041078; padding-left: 8px; margin-bottom: 15px; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; margin-bottom: 40px; }
-        th { background-color: #111827; color: white; padding: 10px; font-weight: bold; text-transform: uppercase; font-size: 11px; border: 1px solid #111827; }
+        th { background-color: #041078; color: white; padding: 10px; font-weight: bold; text-transform: uppercase; font-size: 11px; border: 1px solid #041078; }
         td { padding: 10px; border-bottom: 1px solid #e5e7eb; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; }
         tr:nth-child(even) { background-color: #f9fafb; }
         .text-right { text-align: right; }
         .text-center { text-align: center; }
+        
+        /* GAYA WARNA REVISI LEMBUR */
+        .txt-lembur { font-weight: bold; color: #dc2626; }
+        .txt-normal { color: #9ca3af; }
 
         /* TANDA TANGAN */
         .wrapper-ttd { display: grid; grid-template-columns: 1fr 1fr; font-size: 12px; text-align: center; margin-top: 50px; }
@@ -111,21 +115,21 @@
 </head>
 <body>
 
-    <!-- TOMBOL ATAS (HILANG SAAT PRINTING) -->
+    <!-- TOMBOL ATAS (HILANG OTOMATIS SAAT PROSES PRINTING) -->
     <div class="no-print-container no-print">
         <button onclick="window.print()" class="btn-print">
             Klik Cetak Dokumen / Simpan PDF
         </button>
     </div>
 
-    <!-- STRUKTUR KERTAS LAPORAN -->
+    <!-- STRUKTUR KERTAS LAPORAN SEUAI STANDAR A4 -->
     <div class="kertas-a4">
         
-        <!-- HEADER KOP -->
+        <!-- HEADER KOP REKAP UTAMA PABRIKAN -->
         <div class="header-kop">
             <div>
-                <h1>PT MIRASA FOOD INDUSTRY</h1>
-                <p>Laporan Absensi & Penggajian Karyawan</p>
+                <h1 style="color: #960505; margin: 0; font-size: 26px; font-weight: 900; tracking-tight: -0.05em;">PT MIRASA FOOD INDUSTRY</h1>
+                <p>Laporan Rekapitulasi Absensi & Kehadiran Massal Karyawan</p>
             </div>
             <div>
                 <span class="status-title">Status Dokumen</span>
@@ -133,12 +137,20 @@
             </div>
         </div>
 
-        <!-- INFO PERIODE -->
+        <!-- INFO PERIODE FILTRASI (SUDAH AMAN BEBAS EROR UNDEFINED VARIABLE REQUEST) -->
         <div class="box-periode">
             <div>
-                <span class="box-title">Periode Laporan</span>
+                <span class="box-title">Periode Saringan Laporan</span>
                 <p class="box-val">
-                    {{ $request->filter_tanggal ? \Carbon\Carbon::parse($request->filter_tanggal)->translatedFormat('d F Y') : \Carbon\Carbon::today()->translatedFormat('d F Y') }}
+                    @if(request('tanggal_mulai') && request('tanggal_selesai'))
+                        {{ \Carbon\Carbon::parse(request('tanggal_mulai'))->translatedFormat('d F Y') }} s/d {{ \Carbon\Carbon::parse(request('tanggal_selesai'))->translatedFormat('d F Y') }}
+                    @elseif(request('tanggal_mulai'))
+                        Mulai {{ \Carbon\Carbon::parse(request('tanggal_mulai'))->translatedFormat('d F Y') }}
+                    @elseif(request('tanggal_selesai'))
+                        Sampai {{ \Carbon\Carbon::parse(request('tanggal_selesai'))->translatedFormat('d F Y') }}
+                    @else
+                        Semua Periode Tanggal (Keseluruhan)
+                    @endif
                 </p>
             </div>
             <div style="text-align: right;">
@@ -147,68 +159,87 @@
             </div>
         </div>
 
-        <!-- TIGA KOTAK INFO GAJI BESAR (PERSIS SEPERTI MAP PRODUKSI) -->
-        <div class="grid-gaji">
-            <div class="card-gaji gaji-total">
-                <span class="lbl-gaji t">Total Gaji Keseluruhan</span>
-                <p class="val-gaji t">Rp {{ number_format($attendances->sum('nominal_gaji'), 0, ',', '.') }}</p>
-            </div>
-            <div class="card-gaji gaji-langsung">
-                <span class="lbl-gaji l">Total Gaji Langsung</span>
-                <p class="val-gaji l">Rp {{ number_format($attendances->where('kelompok', 'langsung')->sum('nominal_gaji'), 0, ',', '.') }}</p>
-            </div>
-            <div class="card-gaji gaji-tidak">
-                <span class="lbl-gaji tl">Total Gaji Tidak Langsung</span>
-                <p class="val-gaji tl">Rp {{ number_format($attendances->where('kelompok', 'tidak langsung')->sum('nominal_gaji'), 0, ',', '.') }}</p>
-            </div>
-        </div>
+        <!-- 3 KOTAK INFO GAJI DISEMBUNYIKAN SEMENTARA AGAR TIDAK TAMPIL ANGKA RP 0 PADA LAPORAN ABSENSI -->
 
-        <!-- TABEL RINCIAN DATA -->
-        <div class="sub-judul">I. RINCIAN REKAPITULASI KEHADIRAN & GAJI</div>
+        <!-- TABEL RINCIAN DATA ABSENSI KARYAWAN -->
+        <div class="sub-judul">I. RINCIAN REKAPITULASI DATA KEHADIRAN KARYAWAN</div>
         <table>
             <thead>
                 <tr>
-                    <th style="width: 10%;">Tanggal</th>
-                    <th style="width: 8%;">ID Karyawan</th>
-                    <th style="width: 15%;">Nama Karyawan</th>
-                    <th style="width: 10%;">Devisi</th>
-                    <th style="width: 14%;">Kelompok</th>
-                    <th style="width: 10%;">Shift</th>
-                    <th style="width: 13%;">Jam Kerja</th>
-                    <th style="width: 7%;">Status</th>
-                    <th style="width: 18%; text-align: right;">Nominal Gaji</th>
+                    <th style="width: 5%; text-align: center;">No</th>
+                    <th style="width: 12%;">Tanggal</th>
+                    <th style="width: 12%;">ID Karyawan</th>
+                    <th style="width: 20%;">Nama Karyawan</th>
+                    <th style="width: 13%;">Kelompok</th>
+                    <th style="width: 8%; text-align: center;">Shift</th>
+                    <th style="width: 8%; text-align: center;">Masuk</th>
+                    <th style="width: 8%; text-align: center;">Pulang</th>
+                    <th style="width: 10%; text-align: center;">Jam Kerja</th>
+                    <th style="width: 10%; text-align: center;">Lembur</th>
+                    <th style="width: 14%;">Keterangan</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($attendances as $item)
-                <tr>
-                    <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d/m/Y') }}</td>
-                    <td style="font-weight: bold; color: #4b5563;">{{ $item->id_karyawan }}</td>
-                    <td style="font-weight: bold; color: #111827;">{{ $item->nama_karyawan }}</td>
-                    <td>{{ $item->devisi }}</td>
-                    <td style="text-transform: uppercase; font-weight: 500; color: #4b5563;">{{ $item->kelompok }}</td>
-                    <td style="font-weight: bold; color: #7c3aed;">SHIFT {{ $item->shift }}</td>
-                    <td>{{ $item->jam_masuk ? substr($item->jam_masuk, 0, 5) : '-' }} - {{ $item->jam_pulang ? substr($item->jam_pulang, 0, 5) : '-' }}</td>
-                    <td style="font-weight: bold; text-transform: uppercase; color: {{ $item->keterangan == 'hadir' ? '#059669' : '#d97706' }};">{{ $item->keterangan }}</td>
-                    <td style="font-weight: bold; color: #111827;">Rp {{ number_format($item->nominal_gaji, 0, ',', '.') }}</td>
-                </tr>
+                @forelse($attendances as $index => $item)
+                    @php
+                        $jamKerjaNet = 0;
+                        $jamLembur = 0;
+
+                        if ($item->jam_masuk && $item->jam_pulang) {
+                            $masuk = \Carbon\Carbon::parse($item->jam_masuk);
+                            $pulang = \Carbon\Carbon::parse($item->jam_pulang);
+                            $totalJamKotor = $masuk->diffInHours($pulang);
+                            
+                            // Potong 1 jam istirahat harian pabrik
+                            $jamKerjaNet = $totalJamKotor > 1 ? $totalJamKotor - 1 : $totalJamKotor;
+
+                            // Hitung lembur jika jam kerja bersih di atas 7 jam harian
+                            if ($jamKerjaNet > 7) {
+                                $jamLembur = $jamKerjaNet - 7;
+                            }
+                        }
+                    @endphp
+                    <tr>
+                        <td class="text-center" style="color: #6b7280;">{{ $index + 1 }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
+                        <td style="font-weight: bold; color: #4b5563; font-family: monospace;">{{ $item->employee->id_karyawan ?? '-' }}</td>
+                        <td style="font-weight: bold; color: #111827;">{{ $item->employee->nama_karyawan ?? '-' }}</td>
+                        <td style="text-transform: uppercase; font-size: 11px; color: #047857;">{{ $item->kelompok_kerja_harian ?? $item->employee->kelompok }}</td>
+                        <td class="text-center" style="font-weight: bold; color: #4b5563;">{{ $item->employee->shift ?? '-' }}</td>
+                        <td class="text-center">{{ $item->jam_masuk ? \Carbon\Carbon::parse($item->jam_masuk)->format('H:i') : '-' }}</td>
+                        <td class="text-center">{{ $item->jam_pulang ? \Carbon\Carbon::parse($item->jam_pulang)->format('H:i') : '-' }}</td>
+                        <td class="text-center" style="font-weight: bold; color: #111827;">{{ $jamKerjaNet }} Jam</td>
+                        <td class="text-center">
+                            @if($jamLembur > 0)
+                                <span class="txt-lembur">+{{ $jamLembur }} Jam</span>
+                            @else
+                                <span class="txt-normal">Tidak Ada</span>
+                            @endif
+                        </td>
+                        <td style="color: #4b5563; font-style: italic;">{{ $item->keterangan }}</td>
+                    </tr>
                 @empty
-                <tr><td colspan="9" class="text-center" style="padding: 20px; color: #9ca3af;">Tidak ada rincian data absensi pada periode ini.</td></tr>
+                    <tr>
+                        <td colspan="11" class="text-center" style="padding: 30px; color: #9ca3af; font-style: italic;">
+                            Tidak ditemukan rincian data catatan absensi pada kriteria saringan ini.
+                        </td>
+                    </tr>
                 @endforelse
             </tbody>
         </table>
 
-        <!-- TANDA TANGAN BAWAH -->
+        <!-- AREA PENANDATANGANAN RESMI DOKUMEN -->
         <div class="wrapper-ttd">
             <div></div>
             <div>
-                <p style="margin: 0;">Mengetahui,<br><span style="font-weight: bold; color: #374151;">Kabag. Keuangan PT Mirasa Food Industry</span></p>
+                <p style="margin: 0;">Mengetahui,<br><span style="font-weight: bold; color: #374151;">Kabag. HRD & Personalia PT Mirasa Food Industry</span></p>
                 <p class="space-ttd">( ............................................ )</p>
             </div>
-            <!-- TAMBAHKAN KODE CATATAN KAKI DI SINI -->
-            <div style="margin-top: 50px; text-align: center; font-size: 11px; color: #555; font-style: italic; border-top: 1px dashed #ccc; padding-top: 10px;">
-                *Dokumen ini tidak boleh dicopy atau disebarluaskan tanpa izin dari perusahaan.
-            </div>
+        </div>
+
+        <!-- AREA CATATAN KAKI DOKUMEN INTERNAL -->
+        <div style="margin-top: 60px; text-align: center; font-size: 10px; color: #9ca3af; font-style: italic; border-top: 1px dashed #e5e7eb; padding-top: 12px; letter-spacing: 0.5px;">
+            *Dokumen rekapitulasi kehadiran ini diterbitkan secara otomatis oleh sistem data komputer internal PT Mirasa Food Industry dan bersifat rahasia.
         </div>
 
     </div>

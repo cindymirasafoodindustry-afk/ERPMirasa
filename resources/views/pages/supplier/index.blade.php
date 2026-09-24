@@ -42,8 +42,8 @@
                 {{-- Form Pencarian --}}
                 <form action="{{ route('supplier.index') }}" method="GET" class="relative w-full md:w-64">
                     <input type="text" name="search" value="{{ request('search') }}"
-                        class="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-3 text-sm text-gray-700 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FFC829]"
-                        placeholder="Cari...">
+                        class="w-full rounded-xl border border-gray-300 bg-gray-50 py-2 pl-10 pr-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-900/20 focus:border-blue-900 transition-all"
+                        placeholder="CARI...">
                     <svg xmlns="http://www.w3.org/2000/svg"
                         class="absolute left-3 top-5 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
@@ -163,20 +163,25 @@
 
                 <div class="p-8">
                     {{-- Info Aturan --}}
-                    <div class="mb-6 rounded-xl bg-amber-50 p-4 border border-amber-100">
+                    <div class="mb-6 rounded-xl bg-gray-50 p-4 border border-gray-300">
                         <div class="flex">
-                            <svg class="h-5 w-5 text-amber-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="h-5 w-5 text-indigo-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
                                     clip-rule="evenodd" />
                             </svg>
                             <div class="ml-3">
-                                <h4 class="text-sm font-bold text-amber-800 uppercase tracking-wider">Aturan Penting:
+                                <h4 class="text-sm font-bold text-indigo-500 uppercase tracking-wider">Aturan Penting:
                                 </h4>
-                                <ul class="mt-1 text-xs text-amber-700 space-y-1 list-disc ml-4">
-                                    <li><b>Jenis Supplier</b> harus diisi: Barang atau Bahan Baku.</li>
-                                    <li><strong>Nama Supplier</strong> tidak boleh sama dengan data yang sudah ada.</li>
-                                    <li><strong>Kode Supplier</strong> harus unik (tidak boleh duplikat).</li>
+                                <ul class="mt-1 text-xs text-indigo-500 space-y-1 list-disc ml-4">
+                                    <li><strong>Jenis Supplier</strong> harus diisi dengan tepat: <code class="bg-gray-200 px-1 rounded font-bold">Barang</code> atau <code class="bg-gray-200 px-1 rounded font-bold">Bahan Baku</code>.</li>
+                                    <li><strong>Nama Supplier</strong> tidak boleh sama dengan data yang sudah ada di sistem.</li>
+                                    <li><strong>Kode Supplier</strong> harus unik dan tidak boleh duplikat.</li>
+                                    <li>
+                                        <strong>Format Penulisan Kode Otomatis:</strong><br>
+                                        - Jenis <code class="bg-gray-200 px-1 rounded font-bold">Bahan Baku</code> otomatis tersimpan dengan awalan <span class="font-bold text-red-600">SKG-</span><br>
+                                        - Jenis <code class="bg-gray-200 px-1 rounded font-bold">Barang</code> otomatis tersimpan dengan awalan <span class="font-bold text-red-600">SUP-</span>
+                                    </li>
                                     <li>Pastikan menggunakan format kolom sesuai <strong>Template</strong> yang
                                         tersedia.</li>
                                 </ul>

@@ -178,8 +178,7 @@ class PengeluaranController extends Controller
     {
         return view('pages.pengeluaran.create-administrasi');
     }
-
-
+    
     /**
      * Menyimpan pengeluaran baru
      */

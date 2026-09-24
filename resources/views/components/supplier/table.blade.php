@@ -24,8 +24,7 @@
                                 <div class="text-sm font-semibold text-gray-900">{{ $i->nama_supplier ?? 'No Name' }}
                                 </div>
                                 {{-- KODE BARANG DI BAWAH NAMA --}}
-                                <div
-                                    class="text-xs font-mono text-gray-500 mt-0.5 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100 w-fit">
+                                <div class="text-xs text-font-mono text-gray-500 mt-0.5">
                                     {{ $i->kode ?? 'No Kode' }}
                                 </div>
                             </div>

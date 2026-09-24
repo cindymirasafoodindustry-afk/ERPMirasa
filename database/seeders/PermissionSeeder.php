@@ -24,7 +24,8 @@ class PermissionSeeder extends Seeder
                     'supplier.index',
                     'perusahaan.index',
                     'perusahaan.show',
-                    'proses.index'
+                    'proses.index',
+                    'pemesanan.index'
                 ],
                 'action' => [
                     'costumer.create',
@@ -58,6 +59,10 @@ class PermissionSeeder extends Seeder
                     'proses.edit',
                     'proses.delete',
                     'proses.activate',
+
+                    'pemesanan.create',
+                    'pemesanan.edit',
+                    'pemesanan.delete',
                 ]
             ],
             'Inventory & Produksi' => [
@@ -164,7 +169,9 @@ class PermissionSeeder extends Seeder
                     'roles.index', 
                     'logs.index', 
                     'produk.index', 
-                    'berita.index'
+                    'berita.index',
+                    'absensi.index',
+                    'pemesanan.index',
                     ],
                 'action' => [
                     'user.create',
@@ -181,7 +188,15 @@ class PermissionSeeder extends Seeder
 
                     'berita.create',
                     'berita.edit',
-                    'berita.delete'
+                    'berita.delete',
+
+                    'absensi.create',
+                    'absensi.edit',
+                    'absensi.delete',
+                    
+                    'pemesanan.create',
+                    'pemesanan.edit',
+                    'pemesanan.delete',
                 ]
             ]
         ];

@@ -9,21 +9,20 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+        public function up(): void
     {
-        // MASUKKAN KODENYA TEPAT DI SINI:
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
-            $table->string('tanggal')->default(date('Y-m-d'));
-            $table->string('id_karyawan');
-            $table->string('nama_karyawan');
-            $table->string('devisi');
-            $table->enum('kelompok', ['langsung', 'tidak langsung']);
-            $table->enum('shift', ['non shift', 'A', 'B']);
+            
+            // RELASI OTOMATIS KUNCI KE TABEL MASTER EMPLOYEES
+            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+            
+            // KOLOM INPUT DATA ABSENSI ESSENSIAL
+            $table->date('tanggal');
             $table->time('jam_masuk')->nullable();
             $table->time('jam_pulang')->nullable();
-            $table->enum('keterangan', ['hadir', 'izin', 'sakit']);
-            $table->decimal('nominal_gaji', 12, 2)->default(0);
+            $table->text('keterangan')->nullable(); // Keterangan teks bebas untuk absensi
+            
             $table->timestamps();
         });
     }

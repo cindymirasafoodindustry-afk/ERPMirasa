@@ -4,13 +4,14 @@
             jumlah: 0,
             harga: 0,
             diskon: 0,
+            potongan: 0,
             selectedFoto: '',
             selectedKode: '-',
             selectedSatuan: '-',
             get total() {
                 let subtotal = this.jumlah * this.harga;
-                let potongan = subtotal * (this.diskon / 100);
-                let hasil = subtotal - potongan;
+                let potonganPersen = subtotal * (this.diskon / 100);
+                let hasil = subtotal - potonganPersen - this.potongan;
                 return hasil > 0 ? hasil : 0;
             },
             updateBarang(e) {
@@ -296,6 +297,17 @@
                                                 class="absolute right-4 top-1/2 -translate-y-1/2 text-rose-400 font-bold">%</span>
                                         </div>
                                     </div>
+
+                                    <div class="space-y-1.5 text-left">
+                                        <label class="text-xs font-bold text-gray-500 uppercase ml-1">Potongan Harga (Nominal)</label>
+                                        <div class="relative">
+                                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
+                                            <input type="number" step="any" name="potongan_harga" 
+                                                x-model.number="potongan"
+                                                class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 font-bold outline-none"
+                                                placeholder="0">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -313,7 +325,7 @@
                                     <span>Rp</span>
                                     <span x-text="new Intl.NumberFormat('id-ID').format(total)">0</span>
                                 </div>
-                                <input type="hidden" name="total_harga" :value="total">
+                                <input type="hidden" name="total_harga" :value="total()">
                                 <input type="hidden" name="stok" value="0">
                             </div>
 

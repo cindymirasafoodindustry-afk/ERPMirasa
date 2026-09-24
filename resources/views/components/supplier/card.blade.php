@@ -19,7 +19,10 @@
 
                     <div class="flex flex-col justify-center overflow-hidden">
                         <div class="flex items-center gap-2">
-                            <h2 class="text-sm font-bold text-gray-900 truncate">{{ $i->nama_supplier }}</h2>
+                            <h2 class="text-sm font-bold text-gray-900 truncate">{{ $i->nama_supplier ?? 'No Name' }}</h2>
+                            <div class="text-xs text-font-mono text-gray-500 mt-0.5">
+                                {{ $i->kode ?? 'No Kode' }}
+                            </div>
                             <svg class="w-3 h-3 text-gray-400 transition-transform duration-200"
                                 :class="openCardId === {{ $i->id }} ? 'rotate-180' : ''" fill="none"
                                 stroke="currentColor" viewBox="0 0 24 24">

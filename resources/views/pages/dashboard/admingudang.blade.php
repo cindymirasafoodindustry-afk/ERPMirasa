@@ -20,14 +20,11 @@
                         <a href="{{ route('inventory.index') }}"
                             class="px-5 py-2.5 bg-blue-600 text-white rounded-2xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">Gudang</a>
                     @endcan
-                    {{-- TOMBOL ABSENSI KARYAWAN BARU --}}
-                    @can('absensi.index')
-                        <a href="{{ route('attendance.index') }}"
-                            class="px-5 py-2.5 bg-emerald-600 text-white rounded-2xl font-bold text-sm shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all">Absensi</a>
-                    @endcan
                 </div>
             </div>
         </div>
+
+        
 
         {{-- KPI CARDS --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

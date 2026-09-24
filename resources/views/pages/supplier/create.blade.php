@@ -65,18 +65,17 @@
                         </div>
 
                         <div class="space-y-1">
-                            <label for="kode" class="block text-sm font-semibold text-gray-700">Kode Supplier <span
-                                    class="text-red-500">*</span></label>
+                            <label for="kode" class="block text-sm font-semibold text-gray-700">Kode Supplier <span class="text-red-500">*</span></label>
                             <div class="relative flex">
-                                <span id="prefix-kode"
-                                    class="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-gray-300 bg-gray-50 text-gray-500 font-bold text-sm">
-                                    SUP
+                                <span id="prefix-kode" class="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-gray-300 bg-gray-50 text-gray-500 font-bold text-sm">
+                                    <!-- Berikan tag span dengan id prefix-text di dalam sini -->
+                                    <span id="prefix-text">SUP</span>
                                 </span>
-                                <input type="text" id="kode" name="kode" required placeholder="XXX"
-                                    class="w-full rounded-r-xl border-gray-300 py-2.5 px-4 text-gray-900 shadow-sm focus:outline-none focus:border-[#FFC829] transition-colors border uppercase">
+                                <input type="text" id="kode" name="kode" required placeholder="XXX" class="w-full rounded-r-xl border border-gray-300 py-2.5 px-4 shadow-sm focus:outline-none focus:border-[#FFC029] transition-colors">
                             </div>
-                            <p class="text-[10px] text-gray-400 mt-1 italic">*Kode final akan tersimpan otomatis dengan
-                                format: SUP-KODE_SUPPLIER</p>
+                            <p class="text-[10px] text-gray-400 mt-1 italic">
+                                *Kode final akan tersimpan otomatis dengan format: <span id="format-text">SUP-KODE_SUPPLIER</span>
+                            </p>
                         </div>
 
                     </div>
@@ -106,4 +105,26 @@
             </div>
         </form>
     </div>
+    <script>
+        document.getElementById('jenis_supplier').addEventListener('change', function() {
+            let jenisSupplier = this.value.trim();
+            let prefixText = document.getElementById('prefix-text');
+            let formatText = document.getElementById('format-text');
+            
+            // Menggunakan pencarian kata 'Bahan Baku' agar lebih toleran terhadap variasi teks option
+            if (jenisSupplier.includes('Bahan Baku')) {
+                prefixText.innerText = 'SKG';
+                if (formatText) formatText.innerText = 'SKG-KODE_SUPPLIER';
+            } else {
+                prefixText.innerText = 'SUP';
+                if (formatText) formatText.innerText = 'SUP-KODE_SUPPLIER';
+            }
+        });
+
+        // Jalankan fungsi sekali saat halaman pertama kali dimuat 
+        // untuk mengantisipasi jika dropdown sudah otomatis terpilih oleh 'old' value Laravel
+        window.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('jenis_supplier').dispatchEvent(new Event('change'));
+        });
+    </script>
 </x-layout.user.app>

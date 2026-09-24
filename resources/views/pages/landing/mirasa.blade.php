@@ -19,6 +19,38 @@
     <x-layout.landing.mirasa.section.news :berita="$berita" />
 
     <x-layout.landing.mirasa.section.distributor />
+    
+        <section class="bg-gray-50 py-16 border-t border-b border-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <!-- Judul Atas Video -->
+                <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+                    <span class="text-xs font-black text-red-600 uppercase tracking-widest bg-red-50 px-3 py-1 rounded-full border border-red-100">
+                        Media Eksplorasi
+                    </span>
+                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                        Lihat Proses Produksi <span class="text-red-600">Standar Global</span> Kami
+                    </h3>
+                    <p class="text-xs sm:text-sm text-gray-500 font-medium leading-relaxed">
+                        Intip bagaimana dedikasi dan teknologi modern berpadu di dalam pabrik kami untuk melahirkan produk kuliner Nusantara dengan kualitas mutu terbaik yang siap diekspor ke seluruh dunia.
+                    </p>
+                </div>
+
+                <!-- Boks Pemutar Video Kontainer Sinematik -->
+                <div class="max-w-4xl mx-auto bg-white p-3 rounded-2xl border border-gray-200 shadow-xl transform transition-all duration-300 hover:scale-[1.01]">
+                    <div class="relative aspect-video rounded-xl overflow-hidden bg-slate-950 group">
+                        
+                        <!-- 🚀 KUNCI VIDEO MP4: Pastikan file video kamu ditaruh di folder public/video/ ya sayang! -->
+                        <video id="playerVideoMirasa" class="w-full h-full object-cover" controls autoplay loop muted playsinline preload="metadata" poster="{{ asset('images/poster-video.jpg') }}">
+                            <source src="{{ asset('video/profile-mirasa.mp4') }}" type="video/mp4">
+                            Browser kamu tidak mendukung pemutar video HTML5 ini, sayang.
+                        </video>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
 
     <footer class="bg-[#0A0F1A] text-white pt-24 pb-12 px-6 relative overflow-hidden">
         <div

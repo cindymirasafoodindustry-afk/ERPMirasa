@@ -29,6 +29,8 @@ use App\Http\Controllers\SuperAdminDashboardController;
 use App\Http\Controllers\AdminGudangDashboardController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\EmployeeController;
+
 
 
 
@@ -279,17 +281,76 @@ Route::middleware('auth')->group(function () {
             ->name('grafik.transaksi')
             ->middleware('permission:grafik.transaksi');
     
-    // Route Laporan Absen (Halaman Utama yang mengarahkan user)
-    Route::get('/attendance/print', [AttendanceController::class, 'printReport'])->name('attendance.print');
+
     });
 
     // LOG ACTIVITY
     Route::get('logs', [LogActivityController::class, 'index'])->name('logs.index')->middleware('permission:logs.index');
-    Route::resource('attendance', AttendanceController::class)->names([
-        'index' => 'attendance.index',
-        'store' => 'attendance.store',
-        'update' => 'attendance.update',
-        'destroy' => 'attendance.destroy',
-    ]);
-    Route::post('/attendance/import', [AttendanceController::class, 'import'])->name('attendance.import');
+    // RUTE API ASISTEN OTOMATIS PROFIL KARYAWAN BERDASARKAN ID
+    Route::get('api/employee/{id_karyawan}', function($id_karyawan) {
+        $employee = App\Models\Employee::where('id_karyawan', $id_karyawan)->first();
+        return response()->json($employee);
+    });
+    
+    Route::delete('/attendance/bulk-delete', [\App\Http\Controllers\AttendanceController::class, 'bulkDelete'])->name('attendance.bulkDelete');
+    Route::get('attendance/print', [App\Http\Controllers\AttendanceController::class, 'print'])->name('attendance.print');
+    Route::get('attendance/export', [App\Http\Controllers\AttendanceController::class, 'export'])->name('attendance.export');
+    Route::post('attendance/import', [App\Http\Controllers\AttendanceController::class, 'import'])->name('attendance.import');
+    Route::resource('attendance', App\Http\Controllers\AttendanceController::class);
+    
+    
+
+
+    // CETAK LAPORAN EMPLOYEE
+    Route::get('employee/export', [App\Http\Controllers\EmployeeController::class, 'export'])->name('employee.export');
+    Route::get('employee/print', [App\Http\Controllers\EmployeeController::class, 'print']);
+    Route::post('employee/print', [App\Http\Controllers\EmployeeController::class, 'print'])->name('employee.print');
+    
+    // CRUD EMPLOYEE (FORMASI PREMIUM ANTI-BENTROK RUTE)
+    Route::resource('employee', App\Http\Controllers\EmployeeController::class);
+
+    Route::post('employee/import', [App\Http\Controllers\EmployeeController::class, 'import'])->name('employee.import');
+    Route::post('employee/import-template', [App\Http\Controllers\EmployeeController::class, 'importTemplate'])->name('employee.importTemplate');
+
+    // ================= RUTE GRUP SISTEM PAYROLL & PENGGAJIAN PT MIRASA FOOD INDUSTRY =================
+    Route::get('payroll', [\App\Http\Controllers\PayrollController::class, 'index'])->name('payroll.index');
+    Route::post('payroll/store', [\App\Http\Controllers\PayrollController::class, 'storeOrUpdate'])->name('payroll.store');
+    
+
+    // RUTE KHUSUS OWNER - ANALISIS BIAYA GAJI OPERASIONAL HARIAN PABRIKAN
+    Route::get('payroll/multi-payroll', [App\Http\Controllers\PayrollController::class, 'MultiPayroll'])->name('payroll.MultiPayroll');
+    Route::get('payroll/export-bca', [App\Http\Controllers\PayrollController::class, 'exportBcaCsv'])->name('payroll.exportBca');
+    Route::get('payroll/print-tahunan', [App\Http\Controllers\PayrollController::class, 'printTahunan'])->name('payroll.printTahunan');
+    Route::get('payroll/export-detail-excel', [App\Http\Controllers\PayrollController::class, 'exportDetailExcel'])->name('payroll.exportDetailExcel');
+    Route::get('payroll/detail_harian/print', [App\Http\Controllers\PayrollController::class, 'printHarian'])->name('payroll.printHarian');
+    Route::get('payroll/detail-harian', [\App\Http\Controllers\PayrollController::class, 'detailPayrollHarian'])->name('payroll.detail_harian');
+    Route::get('payroll/api-absensi-harian', [\App\Http\Controllers\PayrollController::class, 'getDailyAttendance'])->name('payroll.daily_attendance');
+    Route::post('payroll/import', [\App\Http\Controllers\PayrollController::class, 'importExcel'])->name('payroll.import');
+    Route::get('payroll/download-template', [\App\Http\Controllers\PayrollController::class, 'downloadTemplatePayroll'])->name('payroll.download_template');
+    Route::get('/payroll/print-slip', [\App\Http\Controllers\PayrollController::class, 'printSlip'])->name('payroll.print_slip');
+    Route::get('/payroll/print-all-slips', [\App\Http\Controllers\PayrollController::class, 'printAllSlips'])->name('payroll.print_all_slips');
+    Route::get('/payroll/kelompok-harian', [\App\Http\Controllers\PayrollController::class, 'gajiKelompokHarian'])->name('payroll.kelompok_harian');
+    Route::get('/payroll/print-laporan-kelompok-harian', [\App\Http\Controllers\PayrollController::class, 'printKelompokHarian'])->name('payroll.print_laporan_kelompok_harian');
+    Route::get('/payroll/print-laporan-kelompok-tahunan', [\App\Http\Controllers\PayrollController::class, 'printKelompokTahunan'])->name('payroll.print_laporan_kelompok_tahunan');
+    Route::get('/payroll/export-excel-kelompok-harian', [\App\Http\Controllers\PayrollController::class, 'exportExcelKelompokHarian'])->name('payroll.export_excel_kelompok_harian');
+    Route::get('/payroll/send-email-massal', [\App\Http\Controllers\PayrollController::class, 'sendEmailMassal'])->name('payroll.send-email-massal');
+
+    Route::middleware(['auth'])->group(function () {
+    // CRUD PEMESANAN BARANG (DILENGKAPI HAK AKSES PERMISSION)
+    Route::get('/pemesanan-barang', [App\Http\Controllers\PemesananBarangController::class, 'index'])->name('pemesanan-barang.index')->middleware('permission:pemesanan.index');
+    Route::get('/pemesanan-barang/create', [App\Http\Controllers\PemesananBarangController::class, 'create'])->name('pemesanan-barang.create')->middleware('permission:pemesanan.create');
+    Route::post('/pemesanan-barang', [App\Http\Controllers\PemesananBarangController::class, 'store'])->name('pemesanan-barang.store')->middleware('permission:pemesanan.create');
+    Route::get('/pemesanan-barang/{id}/edit', [App\Http\Controllers\PemesananBarangController::class, 'edit'])->name('pemesanan-barang.edit')->middleware('permission:pemesanan.edit');
+    Route::put('/pemesanan-barang/{id}', [App\Http\Controllers\PemesananBarangController::class, 'update'])->name('pemesanan-barang.update')->middleware('permission:pemesanan.edit');
+    Route::delete('/pemesanan-barang/{id}', [App\Http\Controllers\PemesananBarangController::class, 'destroy'])->name('pemesanan-barang.destroy')->middleware('permission:pemesanan.delete');
+    Route::patch('/pemesanan-barang/{id}/update-status', [App\Http\Controllers\PemesananBarangController::class, 'updateStatus'])->name('pemesanan-barang.update-status');
+    Route::get('pemesanan-barang/{id}/invoice', [App\Http\Controllers\PemesananBarangController::class, 'fakturPembelian'])->name('pemesanan-barang.invoice');
+    Route::patch('pemesanan-barang/{id}/proses-cicilan', [App\Http\Controllers\PemesananBarangController::class, 'prosesCicilan'])->name('pemesanan-barang.proses-cicilan');
+    Route::patch('pemesanan-barang/{id}/konfirmasi-diterima', [App\Http\Controllers\PemesananBarangController::class, 'konfirmasiDiterima'])->name('pemesanan-barang.konfirmasi-diterima');
+    Route::put('/pemesanan-barang/{id}/ajukan-proses', [App\Http\Controllers\PemesananBarangController::class, 'ajukanProses'])->name('pemesanan-barang.ajukan-proses');
+    Route::post('/pemesanan-barang/{id}/simpan-batch', [App\Http\Controllers\PemesananBarangController::class, 'simpanBatch'])->name('pemesanan-barang.simpan-batch');
+    Route::post('/pemesanan-barang/batch/{id}/kirim-gudang', [App\Http\Controllers\PemesananBarangController::class, 'kirimKeGudang'])->name('pemesanan-barang.kirim-gudang');
+    Route::put('/pemesanan-barang/{id}/ajukan-pembayaran', [App\Http\Controllers\PemesananBarangController::class, 'ajukanPembayaran'])->name('pemesanan-barang.ajukan-pembayaran');
+
+});
 });

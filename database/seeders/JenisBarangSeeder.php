@@ -44,6 +44,7 @@ class JenisBarangSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            
         ];
 
         // Ganti dengan nama tabel Anda yang sesuai

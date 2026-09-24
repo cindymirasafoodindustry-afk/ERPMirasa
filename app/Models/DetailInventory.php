@@ -29,6 +29,7 @@ class DetailInventory extends Model
         'harga',
         'total_harga',
         'diskon',
+        'potongan_harga',
         'kondisi_kerusakan',
         'status_return',
         // 'kondisi_barang',

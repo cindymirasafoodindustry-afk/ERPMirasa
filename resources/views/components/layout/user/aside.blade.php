@@ -81,21 +81,53 @@
                 </li>
             @endcan
 
-             @can('absensi.index')
-            <li>
-                <a href="{{ route('attendance.index') }}" 
-                   class="flex items-center p-3 text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-600 group/item transition-all whitespace-nowrap {{ request()->routeIs('attendance.*') ? 'bg-blue-50 text-blue-600 font-bold' : '' }}">
-                    <div class="min-w-[32px] flex justify-center">
-                        <svg class="w-6 h-6 text-gray-400 group-hover/item:text-blue-600 transition-colors {{ request()->routeIs('attendance.*') ? 'text-blue-600' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://w3.org">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <td class="px-6 py-4">
-                            <span class="ms-4 font-semibold text-sm {{ request()->routeIs('attendance.*') ? 'text-blue-600' : 'text-gray-600' }}"> Absensi Karyawan </span>
-                    </td>
+                             @can('absensi.index')
+        <li x-data="{ openKaryawan: {{ request()->routeIs('attendance.*') ? 'true' : 'false' }} }">
+            <!-- Tombol Induk Menu Karyawan (Peka Kursor) -->
+            <button @click="openKaryawan = !openKaryawan" 
+                    class="w-full flex items-center p-3 text-gray-600 rounded-xl hover:bg-blue-50 hover:text-blue-600 group transition-all whitespace-nowrap {{ request()->routeIs('attendance.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                
+                <div class="flex items-center min-w-[32px] justify-center">
+                    <!-- Ikon Utama Grup Karyawan SVG -->
+                    <svg class="w-6 h-6 text-gray-400 group-hover:text-blue-600 transition-colors {{ request()->routeIs('attendance.*') ? 'text-blue-600' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                
+                <!-- LOGIKA UTAMA: Teks Tampil Transparan & Hanya Muncul Saat Sidebar di-Hover -->
+                <span class="ms-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-semibold text-sm whitespace-nowrap {{ request()->routeIs('attendance.*') ? 'text-blue-600' : '' }}">
+                    Menu Karyawan
+                </span>
+
+                <!-- Ikon Panah Dropdown Mungil di Ujung Kanan (Ikut Muncul Saat di-Hover) -->
+                <svg :class="openKaryawan ? 'rotate-180' : ''" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all duration-200 ms-auto text-gray-400 group-hover:text-blue-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+            </button>
+
+            <!-- Wadah Anak Menu (Otomatis Menyesuaikan Mode Melayang) -->
+            <div x-show="openKaryawan" x-cloak class="py-1.5 space-y-1 bg-gray-50/80 rounded-xl mt-1 flex flex-col items-start pl-4 group-hover:pl-12 transition-all">
+                
+                <!-- 1. Anak Menu: Data Karyawan -->
+                <a href="{{ route('employee.index') }}" class="flex items-center py-1.5 text-xs font-medium transition-colors whitespace-nowrap {{ request()->routeIs('employee.*') ? 'text-blue-600 font-black' : 'text-gray-500 hover:text-blue-600' }}">
+                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('employee.*') ? 'bg-blue-600' : 'bg-gray-400' }} mr-2"></span>
+                    <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Data Karyawan</span>
                 </a>
-            </li>
-            @endcan
+
+                <!-- 2. Anak Menu: Absensi -->
+                <a href="{{ route('attendance.index') }}" class="flex items-center py-1.5 text-xs font-bold transition-colors whitespace-nowrap {{ request()->routeIs('attendance.*') ? 'text-blue-600 font-black' : 'text-gray-500 hover:text-blue-600' }}">
+                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('attendance.*') ? 'bg-blue-600' : 'bg-gray-400' }} mr-2"></span>
+                    <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Absensi Karyawan</span>
+                </a>
+
+                <!-- 3. Anak Menu: Penggajian Karyawan -->
+                <a href="{{ route('payroll.index') }}" class="flex items-center py-1.5 text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors whitespace-nowrap {{ request()->routeIs('payroll.*') ? 'text-blue-600 font-black' : 'text-gray-500 hover:text-blue-600' }}">
+                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('payroll.*') ? 'bg-blue-600' : 'bg-gray-400' }} mr-2"></span>
+                    <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Penggajian Karyawan</span>
+                </a>
+            </div>
+        </li>
+        @endcan
 
             @canany(['laporan.produksi', 'laporan.gudang', 'laporan.pengeluaran', 'laporan.hpp', 'laporan.transaksi'])
                 <li x-data="{ open: false }">

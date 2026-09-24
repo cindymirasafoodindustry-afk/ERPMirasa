@@ -106,12 +106,24 @@ class SupplierController extends Controller
             'kode'           => 'required|string',
         ]);
 
+        // --- AWAL LOGIKA DINAMIS PREFIX KODE ---
+        // Bersihkan input kode dari user jika mereka tidak sengaja mengetik SUP atau SKG di form
+        $cleanKode = preg_replace('/^(SUP|SKG)[-\s]*/i', '', trim($validated['kode']));
+
+        // Menggunakan stripos (tidak sensitif huruf besar/kecil) untuk mengecek kata 'bahan' atau 'baku'
+        if (stripos($validated['jenis_supplier'], 'baku') !== false) {
+            $prefix = 'SKG-';
+        } else {
+            $prefix = 'SUP-';
+        }
+        // --- AKHIR LOGIKA DINAMIS PREFIX KODE ---
+
         // 2. Olah Data (Uppercase & Format Kode)
         $data = [
             'id_perusahaan'  => $validated['id_perusahaan'],
             'nama_supplier'  => $validated['nama_supplier'],
             'jenis_supplier' => $validated['jenis_supplier'],
-            'kode'           => strtoupper('SUP-' . trim($validated['kode'])),
+            'kode'           => strtoupper($prefix . $cleanKode),
         ];
 
         // 3. Simpan ke Database
@@ -157,12 +169,24 @@ class SupplierController extends Controller
             abort(403, 'Anda tidak memiliki izin untuk mengedit data ini.');
         }
 
+        // --- AWAL LOGIKA DINAMIS PREFIX KODE ---
+        // Bersihkan input kode dari user jika mengandung SUP atau SKG lama
+        $cleanKode = preg_replace('/^(SUP|SKG)[-\s]*/i', '', trim($validated['kode']));
+
+        // Cek apakah teks mengandung kata 'baku' tanpa memedulikan huruf besar/kecil
+        if (stripos($validated['jenis_supplier'], 'baku') !== false) {
+            $prefix = 'SKG-';
+        } else {
+            $prefix = 'SUP-';
+        }
+        // --- AKHIR LOGIKA DINAMIS PREFIX KODE ---
+
         // 3. Olah Data (Sama dengan logika Store agar Uppercase)
         $data = [
             'id_perusahaan'  => $validated['id_perusahaan'],
             'nama_supplier'  => $validated['nama_supplier'],
             'jenis_supplier' => $validated['jenis_supplier'],
-            'kode'           => strtoupper('SUP-' . trim($validated['kode'])),
+            'kode'           => strtoupper($prefix . $cleanKode),
         ];
 
         // 4. Eksekusi Update
